@@ -30,6 +30,7 @@ const initialState={
   box:{},
   route:'signin',
   isSignedIn:'false',
+  isFaceDetected:'true',
   user:{
     id:"",
     name:'',
@@ -86,7 +87,7 @@ class App extends Component {
     })
     .then(response=>response.json())
     .then(response=>{
-      if(response){
+      if(response!=="error in api"){
         fetch("https://secret-mountain-68931.herokuapp.com/image",{
           method:'put',
           headers:{'Content-Type':'application/json'},
@@ -96,10 +97,12 @@ class App extends Component {
         })
         .then(response=>response.json())
         .then(count=>{
-          this.setState(Object.assign(this.state.user,{entries:count}))
+          this.setState(Object.assign(this.state.user,{entries:count,isFaceDetected:true}))
         })
-      }
-      this.displayFaceBox(this.calculateFaceLocation(response))
+        this.displayFaceBox(this.calculateFaceLocation(response))
+      }else{
+        this.setState(Object.assign(this.state.user,{isFaceDetected:false}))
+    }
     })
     .catch(err=>console.log(err))
   }
@@ -113,7 +116,7 @@ class App extends Component {
     this.setState({route:route})
   }
   render() {
-    const {isSignedIn,box, imageUrl}=this.state
+    const {isSignedIn,box, imageUrl, isFaceDetected}=this.state
     return (
        <div className="App">
        <Particles className="particles"
@@ -126,7 +129,7 @@ class App extends Component {
            <Logo/>
            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
            <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-           <FaceRecognition box={box}imageUrl={imageUrl}/>
+           <FaceRecognition box={box} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
         </div>
         :(
           this.state.route==='signin'
