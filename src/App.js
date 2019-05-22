@@ -27,7 +27,7 @@ const particleParams={
 const initialState={
   input:'',
   imageUrl:'',
-  box:{},
+  regions:[],
   route:'signin',
   isSignedIn:'false',
   isFaceDetected:'true',
@@ -55,20 +55,8 @@ class App extends Component {
     }})
   }
   calculateFaceLocation=(data)=>{
-    const imageLocation=data.outputs[0].data.regions[0].region_info.bounding_box
-    const image=document.getElementById('inputImage');
-    const width=Number(image.width);
-    const height= Number(image.height);
-    return{
-      topRow:imageLocation.top_row*height,
-      leftCol:imageLocation.left_col*width,
-      bottomRow:height-(imageLocation.bottom_row*height),
-      rightCol:width-(imageLocation.right_col*width)
-    }
-  }
-
-  displayFaceBox =(box)=>{
-    this.setState({box:box})
+    const regions = data.outputs[0].data.regions
+    this.setState({regions})
   }
 
    onInputChange = (event)=>{
@@ -78,7 +66,7 @@ class App extends Component {
   onButtonSubmit = ()=>{
     this.setState({imageUrl:this.state.input})
     
-    fetch("https://secret-mountain-68931.herokuapp.com/imageurl",{
+    fetch("http://localhost:3000/imageurl",{
       method:'post',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -88,7 +76,7 @@ class App extends Component {
     .then(response=>response.json())
     .then(response=>{
       if(response!=="error in api"){
-        fetch("https://secret-mountain-68931.herokuapp.com/image",{
+        fetch("http://localhost:3000/image",{
           method:'put',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
@@ -99,7 +87,7 @@ class App extends Component {
         .then(count=>{
           this.setState(Object.assign(this.state.user,{entries:count,isFaceDetected:true}))
         })
-        this.displayFaceBox(this.calculateFaceLocation(response))
+        this.calculateFaceLocation(response)
       }else{
         this.setState(Object.assign(this.state.user,{isFaceDetected:false}))
     }
@@ -116,7 +104,7 @@ class App extends Component {
     this.setState({route:route})
   }
   render() {
-    const {isSignedIn,box, imageUrl, isFaceDetected}=this.state
+    const {isSignedIn, regions, imageUrl, isFaceDetected}=this.state
     return (
        <div className="App">
        <Particles className="particles"
@@ -129,7 +117,7 @@ class App extends Component {
            <Logo/>
            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
            <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-           <FaceRecognition box={box} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
+           <FaceRecognition regions={regions} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
         </div>
         :(
           this.state.route==='signin'

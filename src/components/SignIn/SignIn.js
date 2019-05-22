@@ -1,13 +1,19 @@
 import React from 'react';
 
+const formErrors={
+	emailError:'',
+	passwordError:''
+}
+const initialState = {
+	signInEmail:'',
+	signInPassword:'',
+	error:'',
+	formErrors
+}
 class SignIn extends React.Component {
 	constructor(props){
 		super(props)
-		this.state={
-			signInEmail:'',
-			signInPassword:'',
-			error:''
-		}
+		this.state=initialState
 	}
 
 	onEmailChange=(event)=>{
@@ -16,30 +22,59 @@ class SignIn extends React.Component {
 	onPasswordChange=(event)=>{
 		this.setState({signInPassword:event.target.value})
 	}
+	validate=()=>{
+		let emailError='';
+		let passwordError='';
+		if (!this.state.signInEmail.includes('@')){
+			emailError='*Invalid Email @';
+		}
+		if (!this.state.signInEmail.includes('.')){
+			emailError='*Invalid Email .';
+		}
+		if(!this.state.signInEmail){
+			emailError='*Email Required';
+		}
+		if(this.state.signInPassword.length<6){
+			passwordError='*Password must be of 6 digits';
+			if(!this.state.signInPassword){
+				passwordError='*Password Required';
+			}
+		}
+		if(emailError || passwordError){
+			this.setState({emailError,passwordError})
+			return false
+		}
+		return true
+	}
 	onSignInSubmit=()=>{
-		fetch("https://secret-mountain-68931.herokuapp.com/signin",{
-			method:'post',
-			headers:{'Content-Type':'application/json'},
-			body:JSON.stringify({
+		const isValid = this.validate();
+		if(isValid){
+			fetch("http://localhost:3000/signin",{
+				method:'post',
+				headers:{'Content-Type':'application/json'},
+				body:JSON.stringify({
 					email:this.state.signInEmail,
 					password:this.state.signInPassword
 				})
-			
-		})
-		.then(response=>response.json())
-		.then(user=>{
-			if(user.id){
-				this.props.loadUser(user)
-				this.props.onRouteChange('home')
-			}else{
-				this.setState({error:user})}
-			}
-		)
-		.catch(console.log)
+			})
+			.then(response=>response.json())
+			.then(user=>{
+					if(user.id){
+						this.props.loadUser(user)
+						this.props.onRouteChange('home')
+					}else{
+						this.setState({error:user})
+					}
+				}
+			)
+			.catch(console.log)
+			this.setState(formErrors)
+		}
 	}
 	render(){
 		const {onRouteChange}=this.props
 		const {onEmailChange,onPasswordChange,onSignInSubmit}=this
+		const {emailError,passwordError} = this.state
 		return (
 		<article className="br3 ba dark-gray b--black-10 mv4 w-100 w-50-m w-25-l mw6 center shadow-3">
 			<main className="pa4 black-80">
@@ -54,6 +89,7 @@ class SignIn extends React.Component {
 			        name="email-address"  
 			        id="email-address"
 			        onChange={onEmailChange}/>
+			        <div className="db fw6 lh-copy f6 red">{emailError}</div>
 			      </div>
 			      <div className="mv3">
 			        <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
@@ -63,27 +99,25 @@ class SignIn extends React.Component {
 			        type="password" 
 			        name="password"  
 			        id="password"/>
+			        <div className="db fw6 lh-copy f6 red">{passwordError}</div>
 			      </div>
 			    </fieldset>
-			    <div className="">
-			      <input 
-			      onClick={onSignInSubmit} 
-			      className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" 
-			      type="submit" 
-			      value="Sign in"/>
+			    <div className = "center">
+				    <div className="pr4 mt3">
+				      <input 
+				      onClick={onSignInSubmit} 
+				      className="b ph3 pv2 shadow-3 input-reset link ba b--black bg-transparent grow pointer f6 dib" 
+				      type="submit" 
+				      value="Sign in"/>
+				    </div>
+				    <div className="">
+				      <p onClick={()=>onRouteChange('register')} className="b ph3 pv2 dim shadow-3 ba b--black bg-transparent grow pointer f6 dib">Register</p>
+				    </div>
 			    </div>
-			    <div className="lh-copy mt3">
-			      <p onClick={()=>onRouteChange('register')} className="f6 link dim black db pointer">Register</p>
-			    </div>
-			    {
-			    	this.state.error==="incorrect data"
-			      	?<label className="db fw6 lh-copy f6 red">*Enter All Fields</label>
-			    
-			      	:(
-			      		this.state.error==="wrong credentials"
-			      		?<label className="db fw6 lh-copy f6 red">*Incorrect Email or Password</label>
-			      		:<label></label>
-			      	)
+			    {//Server Form Validation
+		      		this.state.error==="wrong credentials"
+		      		?<label className="db fw6 lh-copy f6 red">*Incorrect Email or Password</label>
+		      		:null
 				}
 			  </div>
 			</main>

@@ -1,16 +1,47 @@
 import React from 'react';
 
+const formErrors={
+	nameError:'',
+	emailError:'',
+	passwordError:''
+}
+const initialState={
+	email:'',
+	password:'',
+	name:'',
+	error:'',
+	formErrors
+}
 class Register extends React.Component {
 	constructor(props){
 		super(props)
-		this.state={
-			email:'',
-			password:'',
-			name:'',
-			error:''
-		}
+		this.state=initialState
 	}
-
+	validate=()=>{
+		let emailError='';
+		let passwordError='';
+		let nameError='';
+		if (!this.state.email.includes('@' && '.')){
+			emailError='*Invalid Email';
+		}
+		if(!this.state.email){
+			emailError='*Email Required';
+		}
+		if(this.state.password.length<6){
+			passwordError='*Password must be of 6 digits';
+			if(!this.state.password){
+				passwordError='*Password Required';
+			}
+		}
+		if(!this.state.name){
+			nameError='*Name Required';
+		}
+		if(emailError || passwordError || nameError){
+			this.setState({emailError,passwordError,nameError})
+			return false
+		}
+		return true
+	}
 	onEmailChange=(event)=>{
 		this.setState({email:event.target.value})
 	}
@@ -21,7 +52,9 @@ class Register extends React.Component {
 		this.setState({name:event.target.value})
 	}
 	onRegisterSubmit=()=>{
-		fetch("https://secret-mountain-68931.herokuapp.com/register",{
+		const isValid = this.validate()
+		if(isValid){
+			fetch("http://localhost:3000/register",{
 			method:'post',
 			headers:{'Content-Type':'application/json'},
 			body:JSON.stringify({
@@ -29,23 +62,25 @@ class Register extends React.Component {
 					email:this.state.email,
 					password:this.state.password
 				})
-			
-		})
-		.then(response=>response.json())
-		.then(user=>{
-			if(user.id){
-				this.props.loadUser(user)
-				this.props.onRouteChange('home')
-			}else {
-				this.setState({error:user})
-				console.log(this.state)
-			}
-		})
-		.catch(console.log)
+			})
+			.then(response=>response.json())
+			.then(user=>{
+				if(user.id){
+					this.props.loadUser(user)
+					this.props.onRouteChange('home')
+				}else {
+					this.setState({error:user})
+					console.log(this.state)
+				}
+			})
+			.catch(console.log)
+			this.setState(formErrors)
+		}
 	}
 	render(){
 		const {onRouteChange}=this.props
 		const {onEmailChange,onPasswordChange,onRegisterSubmit,onNameChange}=this
+		const {emailError,passwordError, nameError} = this.state
 		return (
 			<article className="br3 ba dark-gray b--black-10 mv4 w-100 w-50-m w-25-l mw6 center shadow-3">
 				<main className="pa4 black-80">
@@ -56,11 +91,12 @@ class Register extends React.Component {
 				        <label className="db fw6 lh-copy f6" htmlFor="email-address">Name</label>
 				        <input 
 				        onChange={onNameChange}
-				        className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
+				        className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-90" 
 				        type="name" 
 				        name="name"  
 				        id="name"
-				        required/>
+				        />
+				        <div className="db fw6 lh-copy f6 red">{nameError}</div>
 				      </div>
 				      <div className="mt3">
 				        <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
@@ -70,40 +106,36 @@ class Register extends React.Component {
 				        type="email" 
 				        name="email-address"  
 				        id="email-address"
-				        required/>
+				        />
+				         <div className="db fw6 lh-copy f6 red">{emailError}</div>
 				      </div>
 				      <div className="mv3">
 				        <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
 				        <input 
-				        className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
+				        className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
 				        type="password" 
 				        name="password"  
 				        id="password"
 				        minLength="6"
-				        required
 				        onChange={onPasswordChange}/>
+				         <div className="db fw6 lh-copy f6 red">{passwordError}</div>
 				      </div>
 				    </fieldset>
 				    <div className="">
 				      <input 
 				      onClick={onRegisterSubmit} 
-				      className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" 
+				      className="b ph3 pv2 shadow-3 link input-reset ba b--black bg-transparent grow pointer f6 dib" 
 				      type="submit" 
 				      value="Register"/>
 				    </div>
 				    <div className="lh-copy mt3">
 				      <label className="db fw6 lh-copy f6">Already a user?</label>
-				      <p onClick={()=>onRouteChange('signin')} className="f6 link dim black db pointer">Sign in</p>
+				      <p onClick={()=>onRouteChange('signin')} className="f6 link dim shadow-3 black b ph3 pv2 ba b--black bg-transparent grow pointer dib db pointer">Sign in</p>
 				    </div>
-				    {
-				    	this.state.error==="incorrect data"
-				      	?<label className="db fw6 lh-copy f6 red">*Enter All Fields</label>
-				    
-				      	:(
-				      		this.state.error==="Unable to register"
-				      		?<label className="db fw6 lh-copy f6 red">*Email Already Registered</label>
-				      		:<label></label>
-				      	)
+				    {//Server Form Validation
+			      		this.state.error==="Unable to register"
+			      		?<label className="db fw6 lh-copy f6 red">*Email Already Registered</label>
+			      		:null
 				    }
 				  </div>
 				</main>
