@@ -26,10 +26,10 @@ class SignIn extends React.Component {
 		let emailError='';
 		let passwordError='';
 		if (!this.state.signInEmail.includes('@')){
-			emailError='*Invalid Email @';
+			emailError='*Invalid Email';
 		}
 		if (!this.state.signInEmail.includes('.')){
-			emailError='*Invalid Email .';
+			emailError='*Invalid Email';
 		}
 		if(!this.state.signInEmail){
 			emailError='*Email Required';
