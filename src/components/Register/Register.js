@@ -54,7 +54,7 @@ class Register extends React.Component {
 	onRegisterSubmit=()=>{
 		const isValid = this.validate()
 		if(isValid){
-			fetch("http://localhost:3000/register",{
+			fetch("https://secret-mountain-68931.herokuapp.com/register",{
 			method:'post',
 			headers:{'Content-Type':'application/json'},
 			body:JSON.stringify({
