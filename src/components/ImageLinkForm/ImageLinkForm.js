@@ -6,7 +6,6 @@ class ImageLinkForm extends Component{
 
 	render(){
 		const {onInputChange, onButtonSubmit, imageFileHandler, imageUploadHandler, progress, isUploading, fileName} = this.props
-		
 		return (
 			<div>
 				<p className='f3'>
@@ -32,7 +31,6 @@ class ImageLinkForm extends Component{
 							?<p className="db f4 fw6 lh-copy blue ">Uploading...<progress value={progress} max='100'/></p>
 							:null
 						}
-						
 						<button className="w-30 grow link f4 bg-light-purple white dib ph3 pv2 pointer ba b--white"
 						onClick={onButtonSubmit}>Detect</button>
 					</div>

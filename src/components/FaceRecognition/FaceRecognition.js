@@ -7,7 +7,6 @@ const FaceRecognition =({regions, isFaceDetected, imageUrl})=>{
 	let faceCount=0;
 	let boundingBox=[]
 	if (regions){
-		console.log("FaceRecognition",regions)
 		faceCount = regions.length
 		if (faceCount!==0){
 			for (var i = 0; i < regions.length; i++) {

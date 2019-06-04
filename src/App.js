@@ -56,12 +56,10 @@ class App extends Component {
   imageFileHandler=event=>{
     this.setState({selectedImage:event.target.files[0]})
     this.setState({fileName:event.target.files[0].name})
-    console.log("imageFileHandler done")
  	 }
 
  	imageUploadHandler = () =>{
 	    const uploadTask = storage.ref(`images/${this.state.selectedImage.name}`).put(this.state.selectedImage)
-      console.log("imageUploadHandler done")
       this.setState({isUploading:true})
 	    uploadTask.on('state_changed',
 	      (snapshot)=>{
@@ -77,7 +75,6 @@ class App extends Component {
 	        //complete
 	        storage.ref('images').child(this.state.selectedImage.name).getDownloadURL()
 	        .then(url=>{
-	          console.log(url)
 	          this.setState({url, isImageUploaded:true})
 	        })
 	        .catch(console.log)
@@ -131,7 +128,7 @@ class App extends Component {
         this.setState(Object.assign(this.state.user,{isFaceDetected:false}))
     }
     })
-    .catch(err=>console.log(err))
+    .catch(console.log)
   }
 
   onRouteChange=(route)=>{
