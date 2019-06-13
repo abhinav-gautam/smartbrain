@@ -2,11 +2,15 @@ import React from 'react';
 import './FaceRecognition.css'
 
 
-const FaceRecognition =({regions, isFaceDetected, imageUrl})=>{
+const FaceRecognition =({regions, isFaceDetected, imageUrl, faceCount, serverResponse})=>{
 
-	let faceCount=0;
+	//let faceCount=0;
 	let boundingBox=[]
+	if(faceCount===0){
+		boundingBox=[]
+	}
 	if (regions){
+		//console.log("FaceRecognition",regions)
 		faceCount = regions.length
 		if (faceCount!==0){
 			for (var i = 0; i < regions.length; i++) {
@@ -25,9 +29,13 @@ const FaceRecognition =({regions, isFaceDetected, imageUrl})=>{
 	return(
 	<div className="center ma">
 		{
-			isFaceDetected===false
+			serverResponse===404
+			?(
+				isFaceDetected===false
 				?<p className="db fw6 lh-copy f6 red">*Bad Image or Image URL</p>
 				:null
+			)
+			:null
 		}
 		<div className="absolute mt3">
 			<div id="parent">

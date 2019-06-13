@@ -70,6 +70,7 @@ class Register extends React.Component {
 					this.props.onRouteChange('home')
 				}else {
 					this.setState({error:user})
+					console.log(this.state)
 				}
 			})
 			.catch(console.log)

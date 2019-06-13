@@ -33,12 +33,14 @@ const initialState={
   isSignedIn:false,
   isImageUploaded:false,
   isInputDetected:false,
-  isFaceDetected:true,
+  isFaceDetected:false,
   isUploading:false,
   selectedImage:null,
   fileName:'',
+  faceCount:0,
   url:"",
   progress:0,
+  serverResponse:0,
   user:{
     id:"",
     name:'',
@@ -53,13 +55,31 @@ class App extends Component {
     this.state=initialState;
   }
 
+  componentWillMount(){
+    if(localStorage.getItem('isSignedIn') && localStorage.getItem('user')){
+      this.setState({
+        user:JSON.parse(localStorage.getItem('user')),
+        route:'home',
+        isSignedIn:true
+      })
+    }
+  }
+  componentDidUpdate(){
+    if (this.state.isSignedIn){
+      localStorage.setItem('isSignedIn',true)
+      localStorage.setItem('user',JSON.stringify(this.state.user))
+    }
+  }
   imageFileHandler=event=>{
     this.setState({selectedImage:event.target.files[0]})
     this.setState({fileName:event.target.files[0].name})
+    //console.log("imageFileHandler done")
  	 }
 
  	imageUploadHandler = () =>{
-	    const uploadTask = storage.ref(`images/${this.state.selectedImage.name}`).put(this.state.selectedImage)
+    if (this.state.selectedImage) {
+      const uploadTask = storage.ref(`images/${this.state.selectedImage.name}`).put(this.state.selectedImage)
+      console.log("imageUploadHandler done")
       this.setState({isUploading:true})
 	    uploadTask.on('state_changed',
 	      (snapshot)=>{
@@ -75,12 +95,14 @@ class App extends Component {
 	        //complete
 	        storage.ref('images').child(this.state.selectedImage.name).getDownloadURL()
 	        .then(url=>{
+	          console.log(url)
 	          this.setState({url, isImageUploaded:true})
 	        })
 	        .catch(console.log)
 	      }
 	      );
-	  }
+    }
+	}
   loadUser=(data)=>{
     this.setState({user:{
       id:data.id,
@@ -92,12 +114,12 @@ class App extends Component {
   }
   calculateFaceLocation=(data)=>{
     const regions = data.outputs[0].data.regions
-    this.setState({regions})
+    this.setState({regions, faceCount:regions.length})
+
   }
 
   onInputChange = (event)=>{
-    this.setState({input:event.target.value})
-    this.setState({isInputDetected:true})
+    this.setState({input:event.target.value, isInputDetected:true})
   }
 
   onButtonSubmit = ()=>{
@@ -112,6 +134,7 @@ class App extends Component {
     .then(response=>response.json())
     .then(response=>{
       if(response!=="error in api"){
+        this.setState({serverResponse:200})
         fetch("https://secret-mountain-68931.herokuapp.com/image",{
           method:'put',
           headers:{'Content-Type':'application/json'},
@@ -121,18 +144,20 @@ class App extends Component {
         })
         .then(response=>response.json())
         .then(count=>{
-          this.setState(Object.assign(this.state.user,{entries:count,isFaceDetected:true}))
+          this.setState(Object.assign(this.state.user,{entries:count,isFaceDetected:true,faceCount:0}))
         })
         this.calculateFaceLocation(response)
       }else{
-        this.setState(Object.assign(this.state.user,{isFaceDetected:false}))
+        this.setState(Object.assign(this.state.user,{isFaceDetected:false,serverResponse:404}))
     }
     })
-    .catch(console.log)
+    .catch(err=>console.log(err))
   }
 
   onRouteChange=(route)=>{
     if(route==='signout'){
+      localStorage.removeItem('isSignedIn')
+      localStorage.removeItem('user')
       this.setState(initialState)
     }else if(route==='home'){
       this.setState({isSignedIn:true})
@@ -140,7 +165,7 @@ class App extends Component {
     this.setState({route:route})
   }
   render() {
-    const {isSignedIn, regions, imageUrl, isFaceDetected}=this.state
+    const {isSignedIn, regions, imageUrl, isFaceDetected, serverResponse}=this.state
     if(this.state.isInputDetected){
       this.setState({imageUrl:this.state.input, isInputDetected:false})
     }
@@ -159,12 +184,12 @@ class App extends Component {
            <Logo/>
            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
            <ImageLinkForm onInputChange={this.onInputChange} fileName={this.state.fileName} isUploading={this.state.isUploading} progress={this.state.progress} imageUploadHandler={this.imageUploadHandler} imageFileHandler={this.imageFileHandler} onButtonSubmit={this.onButtonSubmit}/>
-           <FaceRecognition regions={regions} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
+           <FaceRecognition regions={regions} serverResponse={serverResponse} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
         </div>
         :(
           this.state.route==='signin'
-          ?<SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>
-          :<Register onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>
+          ?<SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser} setLocalStorage={this.setLocalStorage}/>
+          :<Register onRouteChange={this.onRouteChange} loadUser={this.loadUser} setLocalStorage={this.setLocalStorage}/>
         )
      }
       </div>
