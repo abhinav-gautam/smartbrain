@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
 import SignIn from './components/SignIn/SignIn'
+import About from './components/About/About'
 import Register from './components/Register/Register'
 import FaceRecognition from './components/FaceRecognition/FaceRecognition'
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm.js'
@@ -41,6 +42,7 @@ const initialState={
   url:"",
   progress:0,
   serverResponse:0,
+  clearBoundingBox:false,
   user:{
     id:"",
     name:'',
@@ -69,11 +71,21 @@ class App extends Component {
       localStorage.setItem('isSignedIn',true)
       localStorage.setItem('user',JSON.stringify(this.state.user))
     }
+    if(this.state.isInputDetected || this.state.isImageUploaded){
+      this.setState({clearBoundingBox:true})
+    }
+    if(this.state.isInputDetected){
+      this.setState({imageUrl:this.state.input, isInputDetected:false})
+    }
+    if(this.state.isImageUploaded){
+      this.setState({imageUrl:this.state.url, isUploading:false, isImageUploaded:false})
+    }
   }
   imageFileHandler=event=>{
     this.setState({selectedImage:event.target.files[0]})
-    this.setState({fileName:event.target.files[0].name})
-    //console.log("imageFileHandler done")
+    if (event.target.files[0]){
+      this.setState({fileName:event.target.files[0].name})
+    }
  	 }
 
  	imageUploadHandler = () =>{
@@ -123,7 +135,7 @@ class App extends Component {
   }
 
   onButtonSubmit = ()=>{
-    this.setState({fileName:null})
+    this.setState({fileName:null, clearBoundingBox:false})
     fetch("https://secret-mountain-68931.herokuapp.com/imageurl",{
       method:'post',
       headers:{'Content-Type':'application/json'},
@@ -162,16 +174,12 @@ class App extends Component {
     }else if(route==='home'){
       this.setState({isSignedIn:true})
     }
+
     this.setState({route:route})
   }
   render() {
     const {isSignedIn, regions, imageUrl, isFaceDetected, serverResponse}=this.state
-    if(this.state.isInputDetected){
-      this.setState({imageUrl:this.state.input, isInputDetected:false})
-    }
-    if(this.state.isImageUploaded){
-      this.setState({imageUrl:this.state.url, isUploading:false, isImageUploaded:false})
-    }
+
     return (
        <div className="App">
        <Particles className="particles"
@@ -184,12 +192,16 @@ class App extends Component {
            <Logo/>
            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
            <ImageLinkForm onInputChange={this.onInputChange} fileName={this.state.fileName} isUploading={this.state.isUploading} progress={this.state.progress} imageUploadHandler={this.imageUploadHandler} imageFileHandler={this.imageFileHandler} onButtonSubmit={this.onButtonSubmit}/>
-           <FaceRecognition regions={regions} serverResponse={serverResponse} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
+           <FaceRecognition clearBoundingBox={this.state.clearBoundingBox} regions={regions} faceCount={this.state.faceCount} serverResponse={serverResponse} isFaceDetected={isFaceDetected} imageUrl={imageUrl}/>
         </div>
         :(
           this.state.route==='signin'
           ?<SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser} setLocalStorage={this.setLocalStorage}/>
-          :<Register onRouteChange={this.onRouteChange} loadUser={this.loadUser} setLocalStorage={this.setLocalStorage}/>
+          :(
+            this.state.route==='about'
+            ?<About/>
+            :<Register onRouteChange={this.onRouteChange} loadUser={this.loadUser} setLocalStorage={this.setLocalStorage}/>
+          )
         )
      }
       </div>

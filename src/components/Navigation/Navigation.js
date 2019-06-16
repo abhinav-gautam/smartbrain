@@ -4,7 +4,10 @@ const Navigation = ({onRouteChange,isSignedIn})=> {
 	if(isSignedIn===true){
 		return (
 		<nav style={{display:'flex', justifyContent:'space-between'}}>
-			<p className="hidden"></p>
+			<div style={{display:'flex', justifyContent:'space-between'}}>
+			<p className="f3 link dim black underline pa3 pointer" onClick={()=>onRouteChange('about')}>About</p>
+			<p className="f3 link dim black underline pa3 pointer" onClick={()=>onRouteChange('home')}>Home</p>
+			</div>
 			<div className="mainTitle">
 				<p>Smart Brain</p>
 			</div>

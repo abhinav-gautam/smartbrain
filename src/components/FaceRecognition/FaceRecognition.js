@@ -2,29 +2,31 @@ import React from 'react';
 import './FaceRecognition.css'
 
 
-const FaceRecognition =({regions, isFaceDetected, imageUrl, faceCount, serverResponse})=>{
+const FaceRecognition =({clearBoundingBox, regions, isFaceDetected, imageUrl, faceCount, serverResponse})=>{
 
-	//let faceCount=0;
+
 	let boundingBox=[]
 	if(faceCount===0){
 		boundingBox=[]
 	}
 	if (regions){
-		//console.log("FaceRecognition",regions)
 		faceCount = regions.length
 		if (faceCount!==0){
 			for (var i = 0; i < regions.length; i++) {
 				const imageLocation=regions[i].region_info.bounding_box
-			    const image=document.getElementById('inputImage');
-			    const width=Number(image.width);
-			    const height= Number(image.height);
-			    const topRow=imageLocation.top_row*height
-			    const leftCol=imageLocation.left_col*width
-			    const bottomRow=height-(imageLocation.bottom_row*height)
-			    const rightCol=width-(imageLocation.right_col*width)
-			    boundingBox.push(<div key={i} className="bounding-box" style={{top:topRow, bottom:bottomRow, left:leftCol, right:rightCol}}></div>) 
+				const image=document.getElementById('inputImage');
+				const width=Number(image.width);
+				const height= Number(image.height);
+				const topRow=imageLocation.top_row*height
+				const leftCol=imageLocation.left_col*width
+				const bottomRow=height-(imageLocation.bottom_row*height)
+				const rightCol=width-(imageLocation.right_col*width)
+				boundingBox.push(<div key={i} className="bounding-box" style={{top:topRow, bottom:bottomRow, left:leftCol, right:rightCol}}></div>) 
 			}
 		}
+	}
+	if(clearBoundingBox){
+		boundingBox=null
 	}
 	return(
 	<div className="center ma">

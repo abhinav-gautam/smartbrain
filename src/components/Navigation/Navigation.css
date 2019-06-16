@@ -1,8 +1,8 @@
 .mainTitle {
 	font-family: 'Shadows Into Light Two', cursive;
 	font-size: 4em;
-	color: #4E0DA4;
-	text-shadow: #FFF 0px 0px 5px, #FFF 0px 0px 10px, #FFF 0px 0px 15px, #FF2D95 0px 0px 20px, #FF2D95 0px 0px 30px, #FF2D95 0px 0px 40px, #FF2D95 0px 0px 50px, #FF2D95 0px 0px 75px;
+	color: rgb(53, 34, 34);
+	text-shadow: #FFF 0px 0px 5px, #FFF 0px 0px 10px, #FFF 0px 0px 15px, rgb(146, 124, 135) 0px 0px 20px, rgb(160, 130, 145) 0px 0px 30px, rgb(129, 104, 116) 0px 0px 40px, rgb(150, 112, 131) 0px 0px 50px, rgb(143, 105, 124) 0px 0px 75px;
 
 }
 .hidden{
