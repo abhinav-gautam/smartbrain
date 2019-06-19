@@ -9,7 +9,7 @@ const About =()=>{
             <p className="f3">You can give a link for an image or choose a image from your local hard drive.</p>
             <p className="f3">A direct link to an image must be given!!!</p>
             <p className="f2 left ph3 underline red">About the Developer</p>
-            <p className="f3">Developed by Ryan Rayark</p>
+            <p className="f3">Developed by Abhinav Gautam</p>
             <a href="https://github.com/ryan-rayark/smartbrain">Github Link</a>
         </div>
         
